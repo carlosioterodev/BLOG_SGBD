@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog de SGBD — Sistemas Gestores de Base de Datos | UACI</title>
+  <meta name="description" content="Blog del Proyecto Final de GBD: definición y clasificación de los SGBD, modelos relacional y no relacional, diagramas E-R y de modelo relacional, y un recorrido completo por PostgreSQL.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">DB</span>
+        <span>
+          <span class="brand-name">Blog de SGBD</span><br>
+          <span class="brand-sub">UACI · Bases de Datos</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html" class="active">Inicio</a>
+        <a href="que-es-un-sgbd.html">Conceptos</a>
+        <a href="relacional-vs-no-relacional.html">Modelos</a>
+        <a href="postgresql-origen.html">PostgreSQL</a>
+        <a href="index.html#equipo">Equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ================================================== HERO -->
+    <section class="hero">
+      <div class="container">
+        <p class="eyebrow">Proyecto Final de GBD · Universidad Autónoma de Chiriquí</p>
+        <h1>Blog de SGBD</h1>
+        <p class="lead">
+          Un blog sobre <strong>Sistemas Gestores de Base de Datos</strong>: qué son, cómo se
+          clasifican según la necesidad de un proyecto, en qué se diferencian los modelos
+          relacional y no relacional, y un recorrido completo por
+          <strong>PostgreSQL</strong>, el gestor que elegimos.
+        </p>
+        <div class="chips">
+          <span class="chip">Aaron Pérez</span>
+          <span class="chip">Carlos Otero</span>
+          <span class="chip">Enrique López</span>
+          <span class="chip">Cristian Carrera</span>
+        </div>
+        <hr class="rule">
+      </div>
+    </section>
+
+    <!-- ============================================ FINALIDAD -->
+    <section class="section" id="finalidad" style="padding-top: 8px;">
+      <div class="container">
+        <div class="panel">
+          <h2>Finalidad del blog (objetivo)</h2>
+          <p>
+            Este blog es el <strong>proyecto final de la materia de Bases de Datos</strong>.
+            Su finalidad es reunir, explicar y defender por escrito todo lo que aprendimos
+            sobre los Sistemas Gestores de Base de Datos, con un lenguaje claro y ordenado
+            que sirva tanto para estudiar como para apoyar la sustentación del 17 de
+            noviembre de 2026.
+          </p>
+          <p><strong>Objetivos concretos:</strong></p>
+          <ul>
+            <li>Definir qué es un SGBD y clasificarlo según la <strong>cantidad de usuarios</strong>, el <strong>modelo de datos</strong> y la <strong>forma de distribuir la información</strong>.</li>
+            <li>Diferenciar un <strong>gestor relacional</strong> de un <strong>gestor no relacional</strong>, y un <strong>Diagrama Modelo Entidad-Relación (DMER)</strong> de un <strong>Diagrama de Modelo Relacional</strong>.</li>
+            <li>Documentar en profundidad el gestor elegido: <strong>PostgreSQL</strong> (nombre, origen, qué ofrece y cómo lo hace, características, estructura y ejemplo de uso).</li>
+            <li>Dejar una guía de estudio reutilizable para la clase y la sustentación.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ ENTRADAS -->
+    <section class="section" id="entradas">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker">Contenido del curso</span>
+          <h2>Entradas del blog</h2>
+          <p>Nueve artículos organizados en tres bloques: conceptos, modelos y diagramas, y el gestor PostgreSQL.</p>
+        </div>
+
+        <h3 style="color: var(--ink); font-size: 20px; margin: 26px 0 14px;">I. Conceptos básicos</h3>
+        <div class="grid grid-3">
+          <article class="card">
+            <span class="tag">Conceptos</span>
+            <h3><a href="que-es-un-sgbd.html">¿Qué es un SGBD?</a></h3>
+            <p>Definición de un Sistema Gestor de Base de Datos, sus componentes y las funciones que cumple frente a un archivo plano.</p>
+            <div class="meta"><span>Aaron Pérez</span><span class="dot">14 nov 2026</span><span class="dot">5 min</span></div>
+          </article>
+          <article class="card">
+            <span class="tag">Conceptos</span>
+            <h3><a href="clasificacion-sgbd.html">Clasificación de los SGBD</a></h3>
+            <p>Los tres criterios del curso: cantidad de usuarios, modelo de datos y forma en que se distribuye la información.</p>
+            <div class="meta"><span>Cristian Carrera</span><span class="dot">14 nov 2026</span><span class="dot">6 min</span></div>
+          </article>
+          <article class="card">
+            <span class="tag">Conceptos</span>
+            <h3><a href="relacional-vs-no-relacional.html">Relacional vs. no relacional</a></h3>
+            <p>Qué cambia entre ambos enfoques: esquema, lenguaje, integridad, escalabilidad y cuándo conviene elegir cada uno.</p>
+            <div class="meta"><span>Carlos Otero</span><span class="dot">15 nov 2026</span><span class="dot">6 min</span></div>
+          </article>
+        </div>
+
+        <h3 style="color: var(--ink); font-size: 20px; margin: 34px 0 14px;">II. Modelos y diagramas</h3>
+        <div class="grid grid-3">
+          <article class="card">
+            <span class="tag">Modelado</span>
+            <h3><a href="dmer-vs-modelo-relacional.html">DMER vs. Diagrama Modelo Relacional</a></h3>
+            <p>Del rectángulo, el rombo y la elipse a las tablas con claves: en qué se parecen, en qué se diferencian y cómo se transforman.</p>
+            <div class="meta"><span>Carlos Otero</span><span class="dot">15 nov 2026</span><span class="dot">7 min</span></div>
+          </article>
+        </div>
+
+        <h3 style="color: var(--ink); font-size: 20px; margin: 34px 0 14px;">III. PostgreSQL: el gestor elegido</h3>
+        <div class="grid grid-3">
+          <article class="card">
+            <span class="tag">PostgreSQL</span>
+            <h3><a href="postgresql-origen.html">Nombre, siglas y origen</a></h3>
+            <p>Qué significa «PostgreSQL», de dónde viene el proyecto POSTGRES de UC Berkeley y cómo evolucionó hasta hoy.</p>
+            <div class="meta"><span>Aaron Pérez</span><span class="dot">15 nov 2026</span><span class="dot">6 min</span></div>
+          </article>
+          <article class="card">
+            <span class="tag">PostgreSQL</span>
+            <h3><a href="postgresql-que-ofrece.html">Qué ofrece y cómo lo hace</a></h3>
+            <p>Los servicios del motor y su arquitectura cliente-servidor: postmaster, backends, memoria compartida, MVCC y WAL.</p>
+            <div class="meta"><span>Carlos Otero</span><span class="dot">16 nov 2026</span><span class="dot">7 min</span></div>
+          </article>
+          <article class="card">
+            <span class="tag">PostgreSQL</span>
+            <h3><a href="postgresql-caracteristicas.html">Características</a></h3>
+            <p>Modelo de datos y SQL, concurrencia y rendimiento, seguridad, alta disponibilidad y ecosistema de extensiones.</p>
+            <div class="meta"><span>Enrique López</span><span class="dot">16 nov 2026</span><span class="dot">7 min</span></div>
+          </article>
+          <article class="card">
+            <span class="tag">PostgreSQL</span>
+            <h3><a href="postgresql-estructura.html">Estructura interna</a></h3>
+            <p>Procesos, memoria y disco del servidor, y cómo se organizan los datos: del tablespace a la fila.</p>
+            <div class="meta"><span>Enrique López</span><span class="dot">16 nov 2026</span><span class="dot">6 min</span></div>
+          </article>
+          <article class="card">
+            <span class="tag">PostgreSQL</span>
+            <h3><a href="postgresql-ejemplo.html">Ejemplo de uso</a></h3>
+            <p>SQL real paso a paso: crear la base del blog, tablas con claves y JSONB, consultar con JOIN y ver resultados.</p>
+            <div class="meta"><span>Cristian Carrera</span><span class="dot">16 nov 2026</span><span class="dot">6 min</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================== EQUIPO -->
+    <section class="section" id="equipo" style="background: var(--white);">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker">Inicio · Creadores del blog</span>
+          <h2>Quiénes somos</h2>
+          <p>Somos un grupo de cuatro estudiantes de la materia de Bases de Datos del Departamento de Ciencias Computacionales de la Universidad Autónoma de Chiriquí. Cada integrante es responsable de una parte del blog y de su exposición durante la sustentación.</p>
+        </div>
+        <div class="team-grid">
+          <div class="member">
+            <div class="avatar">AP</div>
+            <h3>Aaron Pérez</h3>
+            <span class="role">Conceptos y origen</span>
+            <div class="divider"></div>
+            <p>Estudiante de Ciencias Computacionales con interés en la administración de bases de datos y el desarrollo de servicios web. En el blog escribe la definición de SGBD y el origen de PostgreSQL.</p>
+          </div>
+          <div class="member">
+            <div class="avatar">CO</div>
+            <h3>Carlos Otero</h3>
+            <span class="role">Modelos y arquitectura</span>
+            <div class="divider"></div>
+            <p>Estudiante de Ciencias Computacionales orientado al modelado de datos y a las aplicaciones web. Le corresponde comparar los modelos de datos y explicar cómo funciona por dentro el motor de PostgreSQL.</p>
+          </div>
+          <div class="member">
+            <div class="avatar">EL</div>
+            <h3>Enrique López</h3>
+            <span class="role">Características y estructura</span>
+            <div class="divider"></div>
+            <p>Estudiante de Ciencias Computacionales con foco en seguridad y rendimiento de los sistemas. Desarrolla las características del gestor y su estructura interna de procesos, memoria y disco.</p>
+          </div>
+          <div class="member">
+            <div class="avatar">CC</div>
+            <h3>Cristian Carrera</h3>
+            <span class="role">Clasificación y ejemplo</span>
+            <div class="divider"></div>
+            <p>Estudiante de Ciencias Computacionales interesado en el análisis de datos y en buenas prácticas de SQL. Presenta la clasificación de los SGBD y el ejemplo práctico con código.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================== REFERENCIAS -->
+    <section class="section" id="referencias">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker">Fuentes</span>
+          <h2>Referencias</h2>
+        </div>
+        <ol class="refs">
+          <li>PostgreSQL Global Development Group. <em>PostgreSQL 18 Documentation</em>. Recuperado de <a href="https://www.postgresql.org/docs/" target="_blank" rel="noopener">postgresql.org/docs/</a> (15 nov. 2026).</li>
+          <li>PostgreSQL Project. <em>About PostgreSQL / History</em>. Recuperado de <a href="https://www.postgresql.org/about/" target="_blank" rel="noopener">postgresql.org/about/</a> (15 nov. 2026).</li>
+          <li>PostgreSQL Global Development Group. «PostgreSQL 18.7, 17.12, 16.16, 15.20, 14.25, and 19 RC 2 Released!» (12 nov. 2026).</li>
+          <li>Stonebraker, M. (1986). «The Design of the POSTGRES Storage System». <em>Proceedings of the 13th International Conference on Very Large Data Bases (VLDB)</em>, 251–269.</li>
+          <li>Silberschatz, A., Korth, H. y Sudarshan, S. (2018). <em>Database System Concepts</em> (7.ª ed.). McGraw-Hill Education.</li>
+          <li>Elmasri, R. y Navathe, S. (2016). <em>Fundamentals of Database Systems</em> (7.ª ed.). Pearson.</li>
+          <li>Universidad Autónoma de Chiriquí. <em>Proyecto Final de GBD: Blog de SGBD</em> (material del curso; entrega: 17 nov. 2026).</li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p><strong>Blog de SGBD</strong> — Proyecto Final de Gestión de Bases de Datos</p>
+        <p>Universidad Autónoma de Chiriquí · Departamento de Ciencias Computacionales</p>
+        <p>Grupo: Aaron Pérez · Carlos Otero · Enrique López · Cristian Carrera</p>
+      </div>
+      <div>
+        <p><strong>Sustentación:</strong> 17 de noviembre de 2026</p>
+        <p><a href="#finalidad">Finalidad</a> · <a href="#entradas">Entradas</a> · <a href="#equipo">Quiénes somos</a></p>
+        <p>© 2026 — Material académico de uso escolar.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

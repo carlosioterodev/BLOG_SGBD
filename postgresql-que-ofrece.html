@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostgreSQL: qué ofrece y cómo lo hace | Blog de SGBD</title>
+  <meta name="description" content="Qué servicios brinda PostgreSQL y mediante qué mecanismos los cumple: SQL completo, ACID, MVCC, WAL, replicación, PITR, seguridad y extensibilidad.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">DB</span>
+        <span>
+          <span class="brand-name">Blog de SGBD</span><br>
+          <span class="brand-sub">UACI · Bases de Datos</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="que-es-un-sgbd.html">Conceptos</a>
+        <a href="relacional-vs-no-relacional.html">Modelos</a>
+        <a href="postgresql-origen.html" class="active">PostgreSQL</a>
+        <a href="index.html#equipo">Equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <header class="article-header">
+        <div class="narrow">
+          <div class="breadcrumb"><a href="index.html">Inicio</a> › <a href="index.html#entradas">Entradas</a> › PostgreSQL</div>
+          <span class="tag">PostgreSQL</span>
+          <h1>PostgreSQL: qué ofrece y cómo lo hace</h1>
+          <div class="article-meta">
+            <span class="byline"><span class="mini-avatar">CO</span> Carlos Otero</span>
+            <span>16 de noviembre de 2026</span>
+            <span>7 min de lectura</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="narrow prose">
+
+        <div class="toc">
+          <strong>En esta entrada</strong>
+          <ol>
+            <li><a href="#ofrece">Qué ofrece y cómo lo cumple</a></li>
+            <li><a href="#arquitectura">Arquitectura cliente-servidor</a></li>
+            <li><a href="#mvcc">Qué es MVCC</a></li>
+            <li><a href="#wal">Qué es WAL</a></li>
+            <li><a href="#flujo">Flujo de una consulta</a></li>
+            <li><a href="#ideas">Ideas para llevar</a></li>
+          </ol>
+        </div>
+
+        <p>
+          PostgreSQL se presenta a menudo como «el más avanzado de los SGBD de código
+          abierto», pero la frase no dice nada hasta que se concreta. En esta entrada
+          respondemos dos preguntas: <strong>qué servicios brinda</strong> el motor a
+          quien lo usa y, sobre todo, <strong>mediante qué mecanismos internos</strong>
+          los cumple. Conocer la lista sirve para el examen; entender el mecanismo sirve
+          para diseñar, depurar y justificar decisiones en el proyecto.
+        </p>
+
+        <h2 id="ofrece">Qué ofrece y cómo lo cumple</h2>
+        <p>
+          La oferta de PostgreSQL puede resumirse en diez servicios. La primera columna
+          los describe desde el punto de vista de quien escribe el SQL; la segunda
+          explica qué componente del motor los hace posible.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Servicio</th><th>Cómo lo cumple</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SQL completo</td>
+                <td>Analizador, planificador y executor propios que entienden JOIN, CTE, funciones de ventana y procedimientos PL/pgSQL en el servidor.</td>
+              </tr>
+              <tr>
+                <td>Transacciones ACID</td>
+                <td>WAL y checkpoints garantizan atomicidad, consistencia, aislamiento y durabilidad de cada operación.</td>
+              </tr>
+              <tr>
+                <td>Concurrencia multiusuario</td>
+                <td>MVCC: las lecturas no bloquean a las escrituras ni las escrituras bloquean a las lecturas.</td>
+              </tr>
+              <tr>
+                <td>Tipos ricos</td>
+                <td>JSONB, arrays, rangos, tipos geométricos y búsqueda de texto completo disponibles sin extensiones.</td>
+              </tr>
+              <tr>
+                <td>Particionado declarativo</td>
+                <td>Se define con <code class="inline">CREATE TABLE ... PARTITION BY</code> y el planificador elige las particiones a recorrer.</td>
+              </tr>
+              <tr>
+                <td>Replicación</td>
+                <td>Streaming desde el primario (síncrona o ascíncrona) y replicación lógica por decodificación del WAL.</td>
+              </tr>
+              <tr>
+                <td>Respaldo y recuperación</td>
+                <td>PITR sobre el WAL archivado: se restaura el estado exacto de un instante cualquiera del pasado.</td>
+              </tr>
+              <tr>
+                <td>Seguridad</td>
+                <td>Roles y permisos por objeto, autenticación SCRAM-SHA-256, cifrado TLS y seguridad a nivel de fila.</td>
+              </tr>
+              <tr>
+                <td>Extensibilidad</td>
+                <td><code class="inline">CREATE EXTENSION</code> incorpora PostGIS, pg_stat_statements o pgcrypto sin tocar el motor.</td>
+              </tr>
+              <tr>
+                <td>Interfaces</td>
+                <td>psql, drivers libpq, psycopg2 y JDBC, y el cliente gráfico pgAdmin sobre el mismo protocolo.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="arquitectura">Arquitectura cliente-servidor</h2>
+        <p>
+          PostgreSQL sigue una arquitectura cliente-servidor. Los clientes —psql, una
+          aplicación web o un ORM— se conectan por socket o TCP con un único proceso
+          servidor que administra el archivo de datos compartido. El proceso
+          <strong>postmaster</strong> es el orquestador: acepta las conexiones entrantes,
+          lanza un <em>backend</em> por sesión y supervisa a los procesos auxiliares.
+          Los <em>shared buffers</em> concentran las páginas leídas del disco y los
+          buffers del WAL acumulan los registros pendientes de volcado.
+        </p>
+
+        <div class="diagram">
+          <div class="arch">
+            <div class="col">
+              <div class="node">psql</div>
+              <div class="node">Aplicación web</div>
+              <div class="node">ORM / BI</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="server">
+              <div class="server-title">Servidor PostgreSQL</div>
+              <div class="node">postmaster <small>orquestador</small></div>
+              <div class="node">backends <small>1 por conexión</small></div>
+              <div class="node">shared buffers + WAL buffers</div>
+              <div class="node">walwriter / autovacuum / checkpointer</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="col">
+              <div class="node">data directory <small>($PGDATA)</small></div>
+              <div class="node">WAL <small>(pg_wal)</small></div>
+            </div>
+          </div>
+        </div>
+        <p>
+          Cada cliente obtiene su propio backend, de modo que una sesión colgada no
+          detiene al resto. A la derecha, el disco conserva la <code class="inline">data
+          directory</code> (<code class="inline">$PGDATA</code>) con los datos y el
+          directorio <code class="inline">pg_wal</code> con el registro previo a la
+          escritura: todo lo que el servidor promete, primero queda escrito allí.
+        </p>
+
+        <h2 id="mvcc">Qué es MVCC</h2>
+        <p>
+          <strong>MVCC</strong> (<em>Multi-Version Concurrency Control</em>) es el
+          mecanismo por el cual cada transacción trabaja sobre una instantánea del dato
+          tomada al iniciarse. En lugar de pisar el valor anterior, el motor conserva
+          varias versiones de una fila y decide, según la marca de temporalidad de la
+          transacción, cuál le corresponde ver. Así, una consulta larga no detiene a
+          quien escribe, y una escritura en curso no impide a nadie leer.
+        </p>
+        <div class="callout">
+          <span class="callout-title">Idea clave</span>
+          <p>
+            Cada transacción ve una instantánea del dato: las lecturas no bloquean las
+            escrituras ni las escrituras bloquean las lecturas. El espacio que ocupan
+            las versiones ya no visibles lo recupera <code class="inline">autovacuum</code>.
+          </p>
+        </div>
+
+        <h2 id="wal">Qué es WAL (Write-Ahead Logging)</h2>
+        <p>
+          <strong>WAL</strong> (registro previo a la escritura) es la base de la
+          recuperación y de la replicación. Antes de modificar una página de tabla, el
+          motor escribe un registro descriptivo en el log de trabajo; el cambio en la
+          tabla llega después, cuando el <em>checkpointer</em> lo empuja al disco.
+        </p>
+        <ul>
+          <li>Primero se escribe el registro en el WAL y <strong>luego</strong> el cambio en la tabla: nunca al revés.</li>
+          <li>Si el servidor cae, al reiniciar se reproducen los registros posteriores al último checkpoint y la base queda consistente.</li>
+          <li>El mismo log sirve de canal a la replicación en streaming y de material para el respaldo puntual en el tiempo (PITR).</li>
+        </ul>
+
+        <h2 id="flujo">Flujo de una consulta</h2>
+        <p>Todo lo anterior se pone en marcha cada vez que llega una sentencia:</p>
+        <ol>
+          <li>El cliente se conecta y un <em>backend</em> atiende su sesión; ese proceso quedará encargado de ejecutar todas sus sentencias.</li>
+          <li>El <em>parser</em> analiza el SQL, valida sintaxis y nombres, y construye el árbol de consulta.</li>
+          <li>El planificador (<em>optimizer</em>), con las estadísticas recolectadas por <code class="inline">ANALYZE</code>, estima costos y elige el plan más barato.</li>
+          <li>El executor recorre índices y tablas siguiendo el plan: filtra, ordena, agrupa y proyecta las columnas pedidas.</li>
+          <li>Si hay escritura, el cambio se registra en el WAL y la transacción se confirma con <code class="inline">COMMIT</code>, que espera a que el registro esté en disco.</li>
+        </ol>
+
+        <h2 id="ideas">Ideas para llevar</h2>
+        <div class="callout tip">
+          <span class="callout-title">Resumen</span>
+          <p>
+            1) PostgreSQL ofrece SQL completo, ACID, MVCC, tipos ricos, particionado,
+            replicación, PITR, seguridad, extensibilidad e interfaces. 2) Todo se apoya
+            en una arquitectura cliente-servidor con postmaster, un backend por sesión
+            y buffers compartidos. 3) MVCC y WAL son los dos mecanismos que explican su
+            concurrencia sin bloqueos y su recuperación ante fallos.
+          </p>
+        </div>
+        <p>
+          Si estos mecanismos responden al «cómo», la siguiente entrada se concentra en
+          el «qué» concreto: la lista de características que definen a PostgreSQL frente
+          a otros gestores y que conviene dominar antes de la sustentación.
+        </p>
+
+        <nav class="pager">
+          <a href="postgresql-origen.html"><span class="dir">Anterior</span><span class="ttl">PostgreSQL: nombre, siglas y origen</span></a>
+          <a class="next" href="postgresql-caracteristicas.html"><span class="dir">Siguiente</span><span class="ttl">PostgreSQL: características ›</span></a>
+        </nav>
+
+        <p class="related-title"><a href="index.html#entradas">← Todas las entradas del blog</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p><strong>Blog de SGBD</strong> — Proyecto Final de Gestión de Bases de Datos</p>
+        <p>Universidad Autónoma de Chiriquí · Departamento de Ciencias Computacionales</p>
+        <p>Grupo: Aaron Pérez · Carlos Otero · Enrique López · Cristian Carrera</p>
+      </div>
+      <div>
+        <p><strong>Sustentación:</strong> 17 de noviembre de 2026</p>
+        <p><a href="index.html#finalidad">Finalidad</a> · <a href="index.html#entradas">Entradas</a> · <a href="index.html#equipo">Quiénes somos</a></p>
+        <p>© 2026 — Material académico de uso escolar.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

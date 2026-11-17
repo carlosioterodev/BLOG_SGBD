@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relacional vs. no relacional | Blog de SGBD</title>
+  <meta name="description" content="Comparación entre el modelo relacional (Codd, 1970, SQL, ACID) y el modelo no relacional NoSQL: esquema, lenguaje, integridad, escalabilidad y cuándo elegir cada uno.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">DB</span>
+        <span>
+          <span class="brand-name">Blog de SGBD</span><br>
+          <span class="brand-sub">UACI · Bases de Datos</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="que-es-un-sgbd.html">Conceptos</a>
+        <a href="relacional-vs-no-relacional.html" class="active">Modelos</a>
+        <a href="postgresql-origen.html">PostgreSQL</a>
+        <a href="index.html#equipo">Equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <header class="article-header">
+        <div class="narrow">
+          <div class="breadcrumb"><a href="index.html">Inicio</a> › <a href="index.html#entradas">Entradas</a> › Modelos</div>
+          <span class="tag">Conceptos · III</span>
+          <h1>Relacional vs. no relacional</h1>
+          <div class="article-meta">
+            <span class="byline"><span class="mini-avatar">CO</span> Carlos Otero</span>
+            <span>15 de noviembre de 2026</span>
+            <span>6 min de lectura</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="narrow prose">
+
+        <div class="toc">
+          <strong>En esta entrada</strong>
+          <ol>
+            <li><a href="#relacional">El modelo relacional</a></li>
+            <li><a href="#nosql">El modelo no relacional (NoSQL)</a></li>
+            <li><a href="#comparacion">Comparación lado a lado</a></li>
+            <li><a href="#ventajas">Ventajas y desventajas</a></li>
+            <li><a href="#elegir">Cuándo elegir cada uno</a></li>
+            <li><a href="#ideas">Ideas para llevar</a></li>
+          </ol>
+        </div>
+
+        <p>
+          Cuando un proyecto necesita guardar información, aparece la pregunta
+          clásica de la materia: <strong>¿relacional o no relacional?</strong> Los
+          SGBD se dividen hoy en dos grandes familias. Antes de compararlas
+          conviene ver de dónde viene cada una y qué promete, porque las
+          diferencias no son de detalle: cambian el esquema, el lenguaje, la
+          garantía sobre los datos y la forma de escalar.
+        </p>
+
+        <h2 id="relacional">El modelo relacional</h2>
+        <p>
+          El modelo relacional fue propuesto por <strong>E. F. Codd</strong>,
+          investigador de <strong>IBM</strong>, en <strong>1970</strong>. Su idea
+          central es representar todos los datos en <strong>tablas</strong>
+          (relaciones) compuestas por <strong>filas</strong> (tuplas) y
+          <strong>columnas</strong> (atributos), sin importar cómo se guardan
+          físicamente. Cada tabla tiene una <strong>clave primaria</strong> que
+          identifica de forma única a sus filas, y las <strong>claves
+          foráneas</strong> apuntan a claves de otras tablas: así se construyen
+          las relaciones y se aplica la <strong>integridad referencial</strong>,
+          que impide guardar registros huérfanos. Todo se consulta con
+          <strong>SQL</strong>, un lenguaje declarativo y estándar, y las
+          modificaciones se agrupan en <strong>transacciones ACID</strong>:
+          atómicas, consistentes, aisladas y duraderas. Sus representantes
+          habituales son <strong>PostgreSQL, MySQL, Oracle y SQL Server</strong>.
+        </p>
+
+        <h2 id="nosql">El modelo no relacional (NoSQL)</h2>
+        <p>
+          El modelo no relacional nace de una necesidad concreta: las
+          aplicaciones de la web crecieron tanto que necesitaban
+          <strong>escalar horizontalmente</strong>, agregando servidores en lugar
+          de encargar una máquina cada vez más grande. Su nombre completo,
+          <strong>Not Only SQL</strong> («no solo SQL»), ya avisa de que no
+          rechaza SQL, sino que ofrece alternativas. Estos gestores relajan el
+          esquema y la consistencia fuerte a cambio de tolerancia a fallos,
+          velocidad de lectura y flexibilidad. Los tipos más comunes son:
+        </p>
+        <ul>
+          <li><strong>Documentos:</strong> guardan objetos completos en JSON o XML. Ejemplo: MongoDB.</li>
+          <li><strong>Clave-valor:</strong> pares simples de clave y valor, ideales para caché y sesiones. Ejemplo: Redis.</li>
+          <li><strong>Columnas:</strong> almacenan los datos agrupados por columnas para lecturas masivas. Ejemplo: Cassandra.</li>
+          <li><strong>Grafos:</strong> modelan entidades como nodos y sus relaciones como aristas. Ejemplo: Neo4j.</li>
+        </ul>
+
+        <h2 id="comparacion">Comparación lado a lado</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Aspecto</th>
+                <th>Relacional</th>
+                <th>No relacional</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Esquema</td>
+                <td>Fijo y normalizado, definido antes de cargar los datos.</td>
+                <td>Flexible y denormalizado, puede variar sin migrar todo.</td>
+              </tr>
+              <tr>
+                <td>Lenguaje</td>
+                <td>SQL estándar, igual en casi todos los productos.</td>
+                <td>APIs propias y lenguajes de consulta particulares.</td>
+              </tr>
+              <tr>
+                <td>Integridad</td>
+                <td>Transacciones ACID: atómicas, consistentes, aisladas y duraderas.</td>
+                <td>Modelo BASE: Básica, Disponibilidad y Tolerancia a particiones.</td>
+              </tr>
+              <tr>
+                <td>Escalabilidad</td>
+                <td>Vertical: se potencia el mismo servidor (más CPU y memoria).</td>
+                <td>Horizontal: se añaden nodos a la clúster.</td>
+              </tr>
+              <tr>
+                <td>Transacciones</td>
+                <td>Complejas y multi-tabla en una sola operación.</td>
+                <td>Acotadas a una partición o réplica concreta.</td>
+              </tr>
+              <tr>
+                <td>Relaciones</td>
+                <td>Se unen en el momento con JOINs entre tablas.</td>
+                <td>Se anidan dentro del documento o se duplica de forma controlada.</td>
+              </tr>
+              <tr>
+                <td>Flexibilidad de tipos</td>
+                <td>Tipos fijos: entero, texto, fecha, decimal.</td>
+                <td>Documentos JSON libres, con campos que no existen en todos.</td>
+              </tr>
+              <tr>
+                <td>Caso de uso típico</td>
+                <td>Banca, inventarios, matrícula y sistemas transaccionales.</td>
+                <td>Feeds, catálogos, IoT, geolocalización y caché.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <span class="callout-title">Idea clave</span>
+          <p>
+            La pregunta no es cuál modelo «gana», sino
+            <strong>qué garantías exige el negocio</strong>: si nunca puede
+            perderse una transferencia, manda la atomicidad ACID; si hay que
+            servir millones de lecturas con esquema variable, manda la escala
+            horizontal.
+          </p>
+        </div>
+
+        <h2 id="ventajas">Ventajas y desventajas</h2>
+        <h3>Modelo relacional</h3>
+        <ul>
+          <li><strong>Ventajas:</strong> integridad garantizada por el motor, transacciones fiables, SQL transferible entre productos y reportes complejos con JOIN.</li>
+          <li><strong>Ventajas:</strong> madurez, herramientas de respaldo y monitoreo, y una formación amplia en el mercado.</li>
+          <li><strong>Desventajas:</strong> el esquema rígido obliga a migraciones cuando cambian los requisitos.</li>
+          <li><strong>Desventajas:</strong> la escala vertical suele costar más que agregar servidores baratos.</li>
+        </ul>
+        <h3>Modelo no relacional</h3>
+        <ul>
+          <li><strong>Ventajas:</strong> esquema flexible que admite campos nuevos sin alterar la estructura.</li>
+          <li><strong>Ventajas:</strong> escala horizontal económica y lecturas muy rápidas para el tipo de dato que guardan.</li>
+          <li><strong>Desventajas:</strong> consistencia eventual y duplicación de la información en varias copias.</li>
+          <li><strong>Desventajas:</strong> consultas cruzadas difíciles y falta de un estándar único comparable al SQL.</li>
+        </ul>
+
+        <h2 id="elegir">Cuándo elegir cada uno</h2>
+        <p>
+          Como regla práctica de la materia: elige <strong>relacional</strong>
+          cuando la integridad sea innegociable, cuando necesites informes y
+          consultas con JOINs, y en dominios como <strong>banca, inventarios</strong>
+          o matrícula universitaria. Elige <strong>no relacional</strong> cuando
+          el volumen sea masivo, el esquema sea variable o cambie seguido, y en
+          casos como <strong>sesiones y feeds, geolocalización, grafos</strong> y
+          caché de lectura.
+        </p>
+        <p>
+          Conviene una nota final: <strong>la frontera se difumina</strong>.
+          PostgreSQL, que es relacional, soporta columnas <code class="inline">JSONB</code>,
+          arrays y búsqueda de texto; y muchos sistemas usan ambos modelos a la
+          vez, cada uno para el dato que mejor resuelve. Por eso, hoy más que
+          elegir un bando, se decide qué modelo gana en cada caso de uso.
+        </p>
+
+        <h2 id="ideas">Ideas para llevar</h2>
+        <div class="callout tip">
+          <span class="callout-title">Resumen</span>
+          <p>
+            1) El relacional nace con Codd en 1970 y se apoya en tablas, claves,
+            SQL y ACID. 2) El NoSQL nace de la necesidad de escalar
+            horizontalmente y ofrece documentos, clave-valor, columnas y grafos
+            bajo el modelo BASE. 3) La comparación real se decide por esquema,
+            integridad, escalabilidad y tipo de consulta, y en la práctica
+            conviven ambos.
+          </p>
+        </div>
+        <p>
+          Saber diferenciarlos es el paso previo para modelar: si vamos a
+          representar un entorno con entidades, atributos y relaciones, toca
+          pasar del modelo conceptual al lógico. Ese es el tema de la siguiente
+          entrada.
+        </p>
+
+        <nav class="pager">
+          <a href="clasificacion-sgbd.html"><span class="dir">Anterior</span><span class="ttl">Clasificación de los SGBD</span></a>
+          <a class="next" href="dmer-vs-modelo-relacional.html"><span class="dir">Siguiente</span><span class="ttl">DMER vs. Diagrama Modelo Relacional ›</span></a>
+        </nav>
+
+        <p class="related-title"><a href="index.html#entradas">← Todas las entradas del blog</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p><strong>Blog de SGBD</strong> — Proyecto Final de Gestión de Bases de Datos</p>
+        <p>Universidad Autónoma de Chiriquí · Departamento de Ciencias Computacionales</p>
+        <p>Grupo: Aaron Pérez · Carlos Otero · Enrique López · Cristian Carrera</p>
+      </div>
+      <div>
+        <p><strong>Sustentación:</strong> 17 de noviembre de 2026</p>
+        <p><a href="index.html#finalidad">Finalidad</a> · <a href="index.html#entradas">Entradas</a> · <a href="index.html#equipo">Quiénes somos</a></p>
+        <p>© 2026 — Material académico de uso escolar.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

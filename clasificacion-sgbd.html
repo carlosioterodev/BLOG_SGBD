@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clasificación de los SGBD | Blog de SGBD</title>
+  <meta name="description" content="Tres criterios para clasificar los SGBD según la necesidad del proyecto: cantidad de usuarios, modelo de datos y forma de distribuir la información, con ejemplos.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">DB</span>
+        <span>
+          <span class="brand-name">Blog de SGBD</span><br>
+          <span class="brand-sub">UACI · Bases de Datos</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="que-es-un-sgbd.html" class="active">Conceptos</a>
+        <a href="relacional-vs-no-relacional.html">Modelos</a>
+        <a href="postgresql-origen.html">PostgreSQL</a>
+        <a href="index.html#equipo">Equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <header class="article-header">
+        <div class="narrow">
+          <div class="breadcrumb"><a href="index.html">Inicio</a> › <a href="index.html#entradas">Entradas</a> › Conceptos</div>
+          <span class="tag">Conceptos · II</span>
+          <h1>Clasificación de los SGBD</h1>
+          <div class="article-meta">
+            <span class="byline"><span class="mini-avatar">CC</span> Cristian Carrera</span>
+            <span>14 de noviembre de 2026</span>
+            <span>6 min de lectura</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="narrow prose">
+
+        <div class="toc">
+          <strong>En esta entrada</strong>
+          <ol>
+            <li><a href="#usuarios">Criterio 1: cantidad de usuarios</a></li>
+            <li><a href="#modelo">Criterio 2: modelo de datos</a></li>
+            <li><a href="#distribucion">Criterio 3: forma de distribuir la información</a></li>
+            <li><a href="#elegir">Criterios para elegir</a></li>
+            <li><a href="#ideas">Ideas para llevar</a></li>
+          </ol>
+        </div>
+
+        <p>
+          La rúbrica del proyecto pide clasificar los SGBD
+          <strong>según la necesidad del proyecto</strong>, no según la popularidad
+          de cada marca. Para eso manejamos tres criterios, cada uno con su propia
+          pregunta: ¿cuántas personas usarán la base a la vez?, ¿con qué estructura
+          se organiza la información? y ¿cómo se reparte esa información entre
+          equipos y sedes? Ningún criterio es superior a los otros: sirven para
+          descartar rápido las opciones que no encajan con el problema que vamos a
+          resolver.
+        </p>
+
+        <h2 id="usuarios">Criterio 1 — Cantidad de usuarios</h2>
+        <p>
+          El primer criterio mira cuántos usuarios o aplicaciones pueden leer y
+          escribir <strong>al mismo tiempo</strong> sin estorbarse. De ahí salen
+          dos grandes familias:
+        </p>
+        <ul>
+          <li>
+            <strong>Monousuario:</strong> admite un solo usuario a la vez; si
+            otro intenta abrir la base, espera o recibe un aviso. Es el caso de
+            SQLite en modo <em>single-user</em> y de Microsoft Access. Conviene
+            para herramientas personales, prototipos o archivos que trabaja una
+            sola persona.
+          </li>
+          <li>
+            <strong>Multiusuario:</strong> acepta muchas conexiones simultáneas
+            y las coordina con bloqueos y control de concurrencia para que las
+            escrituras no se pisen. Aquí están PostgreSQL, Oracle y SQL Server:
+            es el escenario normal de un sistema web o de una oficina completa.
+          </li>
+        </ul>
+        <p>
+          Como subtipo dentro de este criterio conviene distinguir la arquitectura
+          <strong>cliente-servidor</strong>, donde la aplicación corre en el
+          cliente y la base de datos vive en un servidor al que se conecta por
+          red, de la <strong>embebida</strong>, donde el motor de la base corre
+          dentro de la misma aplicación. SQLite y Access son embebidos; un
+          PostgreSQL instalado en un servidor es cliente-servidor. El mismo
+          producto puede usarse embebido en desarrollo y cliente-servidor en
+          producción.
+        </p>
+
+        <h2 id="modelo">Criterio 2 — Modelo de datos</h2>
+        <p>
+          El segundo criterio describe <strong>cómo se organizan los datos por
+          dentro</strong> y, en consecuencia, qué lenguaje usaremos para
+          consultarlos:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Modelo</th>
+                <th>Cómo organiza los datos</th>
+                <th>Ejemplos</th>
+                <th>Cuándo conviene</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Relacional</td>
+                <td>Tablas con filas y columnas, unidas por claves; se consulta con SQL.</td>
+                <td>PostgreSQL, MySQL, SQL Server, Oracle</td>
+                <td>Datos con reglas estrictas, reportes y consultas con JOIN.</td>
+              </tr>
+              <tr>
+                <td>Jerárquico</td>
+                <td>Árbol padre-hijo: cada registro tiene un único padre.</td>
+                <td>IBM IMS</td>
+                <td>Estructuras estables y navegación de arriba hacia abajo.</td>
+              </tr>
+              <tr>
+                <td>En red</td>
+                <td>Árbol generalizado: un registro puede tener varios padres.</td>
+                <td>CODASYL</td>
+                <td>Relaciones múltiples sin duplicar registros.</td>
+              </tr>
+              <tr>
+                <td>Orientado a objetos</td>
+                <td>Objetos de la aplicación almacenados tal cual, sin descomponerlos en filas.</td>
+                <td>ObjectDB</td>
+                <td>Aplicaciones escritas en lenguajes orientados a objetos.</td>
+              </tr>
+              <tr>
+                <td>Documentos</td>
+                <td>Documentos JSON o XML completos, con esquema flexible.</td>
+                <td>MongoDB, CouchDB</td>
+                <td>Contenido variado: catálogos, perfiles, configuraciones.</td>
+              </tr>
+              <tr>
+                <td>Clave-valor</td>
+                <td>Pares de clave y valor, sin estructura fija.</td>
+                <td>Redis, DynamoDB</td>
+                <td>Caché, sesiones y datos de lectura muy rápida.</td>
+              </tr>
+              <tr>
+                <td>Columnares</td>
+                <td>Guarda los datos por columnas y no por filas.</td>
+                <td>Cassandra, HBase</td>
+                <td>Analítica y agregaciones sobre grandes volúmenes.</td>
+              </tr>
+              <tr>
+                <td>Grafos</td>
+                <td>Nodos y aristas que modelan relaciones directamente.</td>
+                <td>Neo4j</td>
+                <td>Redes sociales, rutas y recomendaciones.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <span class="callout-title">Idea clave</span>
+          <p>
+            No existe un modelo «mejor» en abstracto: el criterio es
+            <strong>ajustar la forma de los datos a la forma del problema</strong>.
+            Si los datos son entidades con relaciones claras y reglas de negocio
+            estrictas, manda el modelo relacional; si el documento o el grafo ya
+            dibuja la respuesta, conviene un modelo no relacional.
+          </p>
+        </div>
+
+        <h2 id="distribucion">Criterio 3 — Forma de distribuir la información</h2>
+        <p>
+          El tercer criterio pregunta <strong>dónde y cómo se reparte</strong> la
+          información entre los equipos que la usan:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Forma</th>
+                <th>Características</th>
+                <th>Ejemplos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Centralizada</td>
+                <td>Todo vive en un solo servidor; los accesos se hacen desde ahí.</td>
+                <td>Base de datos de una sola oficina</td>
+              </tr>
+              <tr>
+                <td>Cliente-servidor</td>
+                <td>La aplicación corre en el cliente y la base en el servidor, comunicados por red.</td>
+                <td>PostgreSQL, Oracle, SQL Server</td>
+              </tr>
+              <tr>
+                <td>Distribuida</td>
+                <td>Los datos están en varios nodos o sedes y el sistema los presenta con transparencia de localización.</td>
+                <td>Bases repartidas por sucursales</td>
+              </tr>
+              <tr>
+                <td>Paralela</td>
+                <td>Varios procesadores atienden la consulta a la vez (MPP); enfocada en analítica.</td>
+                <td>Almacenes de datos para reportes</td>
+              </tr>
+              <tr>
+                <td>Replicada / nube</td>
+                <td>Copias de los datos en varios sitios para alta disponibilidad y tolerancia a fallos.</td>
+                <td>Despliegues en la nube con varias réplicas</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="elegir">Criterios para elegir</h2>
+        <p>
+          Antes de instalar nada conviene responder cinco preguntas cortas sobre
+          el proyecto:
+        </p>
+        <ol>
+          <li><strong>Número de usuarios simultáneos:</strong> ¿trabaja una persona o cien a la vez?</li>
+          <li><strong>Tipo y estructura de los datos:</strong> son homogéneos y relacionados, o variables y documentados.</li>
+          <li><strong>Ubicación geográfica:</strong> ¿todo en una sede o repartido entre varias?</li>
+          <li><strong>Volumen y tipo de consultas:</strong> transacciones cortas (OLTP) frente a análisis de grandes volúmenes.</li>
+          <li><strong>Presupuesto:</strong> licencias, hardware, costos en la nube y equipo humano para administrarlo.</li>
+        </ol>
+
+        <h2 id="ideas">Ideas para llevar</h2>
+        <div class="callout tip">
+          <span class="callout-title">Resumen</span>
+          <p>
+            1) Clasificar un SGBD responde a la necesidad del proyecto, no a la
+            moda. 2) Los tres criterios son cantidad de usuarios, modelo de datos
+            y forma de distribuir la información. 3) Ninguno es mejor que otro:
+            se combinan para descartar opciones y justificar la elección.
+          </p>
+        </div>
+        <p>
+          Con estos tres criterios ya podemos ordenar cualquier gestor en una
+          casilla concreta. Pero queda la pregunta más frecuente en los exámenes:
+          <strong>¿el modelo relacional sigue siendo la única opción?</strong> Ese
+          es el tema de la siguiente entrada.
+        </p>
+
+        <nav class="pager">
+          <a href="que-es-un-sgbd.html"><span class="dir">Anterior</span><span class="ttl">¿Qué es un SGBD?</span></a>
+          <a class="next" href="relacional-vs-no-relacional.html"><span class="dir">Siguiente</span><span class="ttl">Relacional vs. no relacional ›</span></a>
+        </nav>
+
+        <p class="related-title"><a href="index.html#entradas">← Todas las entradas del blog</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p><strong>Blog de SGBD</strong> — Proyecto Final de Gestión de Bases de Datos</p>
+        <p>Universidad Autónoma de Chiriquí · Departamento de Ciencias Computacionales</p>
+        <p>Grupo: Aaron Pérez · Carlos Otero · Enrique López · Cristian Carrera</p>
+      </div>
+      <div>
+        <p><strong>Sustentación:</strong> 17 de noviembre de 2026</p>
+        <p><a href="index.html#finalidad">Finalidad</a> · <a href="index.html#entradas">Entradas</a> · <a href="index.html#equipo">Quiénes somos</a></p>
+        <p>© 2026 — Material académico de uso escolar.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostgreSQL en acción: ejemplo de uso | Blog de SGBD</title>
+  <meta name="description" content="Ejemplo práctico paso a paso en PostgreSQL: crear la base del blog, tablas con claves foráneas y JSONB, consultar con JOIN, indexar con GIN y respaldar con pg_dump.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">DB</span>
+        <span>
+          <span class="brand-name">Blog de SGBD</span><br>
+          <span class="brand-sub">UACI · Bases de Datos</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="que-es-un-sgbd.html">Conceptos</a>
+        <a href="relacional-vs-no-relacional.html">Modelos</a>
+        <a href="postgresql-origen.html" class="active">PostgreSQL</a>
+        <a href="index.html#equipo">Equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <header class="article-header">
+        <div class="narrow">
+          <div class="breadcrumb"><a href="index.html">Inicio</a> › <a href="index.html#entradas">Entradas</a> › PostgreSQL</div>
+          <span class="tag">PostgreSQL</span>
+          <h1>PostgreSQL en acción: ejemplo de uso</h1>
+          <div class="article-meta">
+            <span class="byline"><span class="mini-avatar">CC</span> Cristian Carrera</span>
+            <span>16 de noviembre de 2026</span>
+            <span>6 min de lectura</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="narrow prose">
+
+        <div class="toc">
+          <strong>En esta entrada</strong>
+          <ol>
+            <li><a href="#requisitos">Requisitos</a></li>
+            <li><a href="#esquema">El esquema paso a paso</a></li>
+            <li><a href="#consultas">Consultas con JOIN y JSONB</a></li>
+            <li><a href="#seguridad">Seguridad y respaldo</a></li>
+            <li><a href="#resultados">Resultados</a></li>
+            <li><a href="#ideas">Ideas para llevar</a></li>
+          </ol>
+        </div>
+
+        <p>
+          En las entradas anteriores hablamos de teoría: qué es un SGBD, cómo se
+          clasifican y cómo funciona por dentro PostgreSQL. Esta vez toca escribir SQL.
+          Vamos a montar, en cinco pasos, la base de datos del propio blog: crear la
+          base, definir tablas con claves y un campo <code class="inline">jsonb</code>,
+          cargar datos reales, consultarlos con <code class="inline">JOIN</code> y
+          terminar con seguridad y respaldo. Todo el código se puede copiar y pegar
+          tal cual en una terminal.
+        </p>
+
+        <h2 id="requisitos">Requisitos</h2>
+        <p>
+          Antes de empezar hacen falta dos cosas. Primera: tener
+          <strong>PostgreSQL 18</strong> instalado; la descarga y la documentación
+          oficial están en la web del proyecto
+          (<a href="https://www.postgresql.org/docs/" target="_blank" rel="noopener">postgresql.org/docs</a>).
+          Segunda: abrir una terminal y conectarse con <strong>psql</strong>, el
+          cliente de línea de comandos que viene con el servidor. Si
+          <code class="inline">psql --version</code> responde, estamos listos; si el
+          servidor no está corriendo, hay que iniciarlo antes de continuar.
+        </p>
+        <div class="callout">
+          <span class="callout-title">Idea clave</span>
+          <p>
+            Un SGBD se usa desde un <strong>cliente</strong> (psql, un editor SQL, una
+            aplicación web) que se conecta al <strong>servidor</strong>. Todo lo que
+            escribimos viaja en SQL; el servidor es quien lo analiza, lo planifica y lo
+            ejecuta sobre el disco.
+          </p>
+        </div>
+
+        <h2 id="esquema">El esquema paso a paso</h2>
+
+        <h3>Paso 1 — crear la base de datos y conectarse</h3>
+        <p>
+          Creamos la base y entramos a ella. El primer comando es SQL; el segundo es
+          una meta-instrucción de psql (empieza con barra invertida) que reconecta la
+          sesión recién creada:
+        </p>
+<pre class="code"><code><span class="c">-- Paso 1: crear la base y conectarse</span>
+<span class="k">CREATE DATABASE</span> blog_sgbd;
+<span class="c">\c blog_sgbd</span></code></pre>
+
+        <h3>Paso 2 — crear las tablas</h3>
+        <p>
+          Definimos dos tablas. Fíjate en cada cláusula: <strong>PRIMARY KEY</strong>
+          marca la clave primaria que identifica de forma única cada fila;
+          <strong>NOT NULL</strong> impide guardar valores vacíos en esa columna;
+          <strong>REFERENCES</strong> crea la clave foránea que obliga a que
+          <code class="inline">autor_id</code> exista en <code class="inline">autores</code>;
+          y <strong>jsonb</strong> es un tipo binario para documentos JSON que se puede
+          consultar con índices. <code class="inline">serial</code> genera un
+          identificador incremental en cada inserción:
+        </p>
+<pre class="code"><code><span class="c">-- Paso 2: tablas con claves y JSONB</span>
+<span class="k">CREATE TABLE</span> autores (
+  id <span class="t">serial</span> <span class="k">PRIMARY KEY</span>,
+  nombre <span class="t">varchar</span>(<span class="n">80</span>) <span class="k">NOT NULL</span>,
+  iniciales <span class="t">char</span>(<span class="n">2</span>)
+);
+
+<span class="k">CREATE TABLE</span> entradas (
+  id <span class="t">serial</span> <span class="k">PRIMARY KEY</span>,
+  titulo <span class="t">varchar</span>(<span class="n">120</span>) <span class="k">NOT NULL</span>,
+  fecha <span class="t">date</span> <span class="k">NOT NULL</span>,
+  minutos <span class="t">int</span> <span class="k">NOT NULL</span>,
+  autor_id <span class="t">int</span> <span class="k">NOT NULL</span> <span class="k">REFERENCES</span> autores(id),
+  tags <span class="t">jsonb</span> <span class="k">NOT NULL</span>
+);</code></pre>
+
+        <h3>Paso 3 — cargar los datos</h3>
+        <p>
+          Insertamos cuatro autores y cuatro entradas. En <code class="inline">tags</code>
+          usamos la notación <code class="inline">'[...]'::jsonb</code>, que convierte una
+          cadena en JSON binario listo para consultar:
+        </p>
+<pre class="code"><code><span class="c">-- Paso 3: datos de prueba</span>
+<span class="k">INSERT INTO</span> autores (nombre, iniciales) <span class="k">VALUES</span>
+  (<span class="s">'Aaron Pérez'</span>, <span class="s">'AP'</span>),
+  (<span class="s">'Carlos Otero'</span>, <span class="s">'CO'</span>),
+  (<span class="s">'Enrique López'</span>, <span class="s">'EL'</span>),
+  (<span class="s">'Cristian Carrera'</span>, <span class="s">'CC'</span>);
+
+<span class="k">INSERT INTO</span> entradas (titulo, fecha, minutos, autor_id, tags) <span class="k">VALUES</span>
+  (<span class="s">'¿Qué es un SGBD?'</span>, <span class="s">'2026-11-14'</span>, <span class="n">5</span>, <span class="n">1</span>, <span class="s">'["conceptos","sql"]'</span>::<span class="t">jsonb</span>),
+  (<span class="s">'Clasificación de los SGBD'</span>, <span class="s">'2026-11-15'</span>, <span class="n">6</span>, <span class="n">2</span>, <span class="s">'["conceptos","modelos"]'</span>::<span class="t">jsonb</span>),
+  (<span class="s">'PostgreSQL: características'</span>, <span class="s">'2026-11-16'</span>, <span class="n">6</span>, <span class="n">3</span>, <span class="s">'["postgresql","sql"]'</span>::<span class="t">jsonb</span>),
+  (<span class="s">'PostgreSQL: estructura interna'</span>, <span class="s">'2026-11-16'</span>, <span class="n">6</span>, <span class="n">3</span>, <span class="s">'["postgresql","administracion"]'</span>::<span class="t">jsonb</span>);</code></pre>
+
+        <h2 id="consultas">Consultas con JOIN y JSONB</h2>
+        <p>
+          Con los datos cargados llega lo interesante. Cuatro consultas típicas de
+          cualquier proyecto:
+        </p>
+<ul>
+          <li><strong>(a) JOIN + ORDER BY:</strong> une <code class="inline">entradas</code> con <code class="inline">autores</code> por la clave foránea y lista los artículos con el nombre de quien los escribió.</li>
+          <li><strong>(b) Contención en JSONB:</strong> el operador <code class="inline">@&gt;</code> pregunta «¿este arreglo contiene la etiqueta?».</li>
+          <li><strong>(c) Índice GIN:</strong> acelera justo esa búsqueda dentro del JSON.</li>
+          <li><strong>(d) COUNT + GROUP BY:</strong> cuenta cuántas entradas tiene cada autor.</li>
+        </ul>
+<pre class="code"><code><span class="c">-- (a) entradas con el nombre del autor</span>
+<span class="k">SELECT</span> e.titulo, e.fecha, a.nombre
+<span class="k">FROM</span> entradas <span class="k">AS</span> e
+<span class="k">JOIN</span> autores <span class="k">AS</span> a <span class="k">ON</span> a.id = e.autor_id
+<span class="k">ORDER BY</span> e.fecha <span class="k">DESC</span>;
+
+<span class="c">-- (b) buscar por etiqueta en JSONB (contención)</span>
+<span class="k">SELECT</span> titulo
+<span class="k">FROM</span> entradas
+<span class="k">WHERE</span> tags <span class="n">@&gt;</span> <span class="s">'["postgresql"]'</span>::<span class="t">jsonb</span>;
+
+<span class="c">-- (c) índice GIN: imprescindible para que (b) no lea todas las filas</span>
+<span class="k">CREATE INDEX</span> idx_entradas_tags
+<span class="k">ON</span> entradas <span class="k">USING</span> gin (tags);
+
+<span class="c">-- (d) entradas por autor</span>
+<span class="k">SELECT</span> a.nombre, <span class="k">COUNT</span>(*) <span class="k">AS</span> entradas
+<span class="k">FROM</span> autores <span class="k">AS</span> a
+<span class="k">JOIN</span> entradas <span class="k">AS</span> e <span class="k">ON</span> e.autor_id = a.id
+<span class="k">GROUP BY</span> a.nombre
+<span class="k">ORDER BY</span> entradas <span class="k">DESC</span>;</code></pre>
+        <p>
+          ¿Por qué un índice <strong>GIN</strong> (Generalized Inverted Index)? Porque
+          está pensado para valores compuestos: descompone el JSONB en todas las
+          etiquetas que contiene y permite localizarlas sin recorrer la tabla entera.
+          Un índice ordinario no sirve aquí, ya que compara valores completos y
+          <code class="inline">tags</code> es una estructura anidada.
+        </p>
+
+        <h2 id="seguridad">Seguridad y respaldo</h2>
+        <p>
+          Un sistema real nunca se usa solo desde el superusuario. Creamos un rol con
+          acceso de lectura y le damos permiso únicamente sobre lo que debe ver; después,
+          exportamos la base completa con <code class="inline">pg_dump</code> para
+          poder restaurarla ante cualquier fallo:
+        </p>
+<pre class="code"><code><span class="c">-- crear un usuario de solo lectura</span>
+<span class="k">CREATE ROLE</span> lector <span class="k">LOGIN PASSWORD</span> <span class="s">'UACI2026'</span>;
+<span class="k">GRANT SELECT ON</span> entradas <span class="k">TO</span> lector;
+
+<span class="c">-- respaldo de la base completa (desde la terminal)</span>
+pg_dump -U postgres blog_sgbd &gt; respaldo.sql</code></pre>
+        <p>
+          Con esto cerramos el ciclo completo de administración que vimos en la
+          teoría: <strong>definición</strong> (DDL), <strong>manipulación</strong> (DML),
+          <strong>control</strong> (permisos) y <strong>administración</strong> (respaldo).
+        </p>
+
+        <h2 id="resultados">Resultados</h2>
+        <p>
+          Estas son las salidas que arroja el servidor con los datos anteriores. Primero
+          la tabla de autores, tal como quedó tras los <code class="inline">INSERT</code>:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>id</th><th>nombre</th><th>iniciales</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Aaron Pérez</td><td>AP</td></tr>
+              <tr><td>2</td><td>Carlos Otero</td><td>CO</td></tr>
+              <tr><td>3</td><td>Enrique López</td><td>EL</td></tr>
+              <tr><td>4</td><td>Cristian Carrera</td><td>CC</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Y el resultado de la consulta (a), que combina las dos tablas mediante el
+          <code class="inline">JOIN</code>:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>titulo</th><th>fecha</th><th>nombre</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>PostgreSQL: estructura interna</td><td>2026-11-16</td><td>Enrique López</td></tr>
+              <tr><td>PostgreSQL: características</td><td>2026-11-16</td><td>Enrique López</td></tr>
+              <tr><td>Clasificación de los SGBD</td><td>2026-11-15</td><td>Carlos Otero</td></tr>
+              <tr><td>¿Qué es un SGBD?</td><td>2026-11-14</td><td>Aaron Pérez</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Por último, la consulta (d) con el conteo de entradas por autor (los autores
+          sin artículos no aparecen, porque el <code class="inline">JOIN</code> descarta
+          esos pares):
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>nombre</th><th>entradas</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Enrique López</td><td>2</td></tr>
+              <tr><td>Aaron Pérez</td><td>1</td></tr>
+              <tr><td>Carlos Otero</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="ideas">Ideas para llevar</h2>
+        <div class="callout tip">
+          <span class="callout-title">Resumen</span>
+          <p>
+            1) Un proyecto se levanta en cinco pasos: crear la base, definir el esquema
+            con claves primarias, foráneas y restricciones <code class="inline">NOT NULL</code>,
+            cargar datos, consultar y respaldar. 2) El <code class="inline">JOIN</code>
+            une lo que guardamos en tablas distintas y el <code class="inline">jsonb</code>
+            flexibiliza lo que aún no tiene forma fija. 3) Índices GIN, permisos con
+            <code class="inline">GRANT</code> y <code class="inline">pg_dump</code> son la
+            diferencia entre una demo y un sistema en producción.
+          </p>
+        </div>
+        <p>
+          Así cerramos el recorrido completo de la materia: partimos del DMER y de la
+          teoría del SGBD, clasificamos los modelos, abrimos el motor de PostgreSQL y
+          terminamos escribiendo SQL real. De la teoría a la práctica, en cuatro pasos y
+          una terminal.
+        </p>
+
+        <nav class="pager">
+          <a href="postgresql-estructura.html"><span class="dir">Anterior</span><span class="ttl">PostgreSQL: estructura interna</span></a>
+          <a class="next" href="index.html" dir="Final"><span class="dir">Siguiente</span><span class="ttl">Volver a la portada ›</span></a>
+        </nav>
+
+        <p class="related-title"><a href="index.html#entradas">← Todas las entradas del blog</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p><strong>Blog de SGBD</strong> — Proyecto Final de Gestión de Bases de Datos</p>
+        <p>Universidad Autónoma de Chiriquí · Departamento de Ciencias Computacionales</p>
+        <p>Grupo: Aaron Pérez · Carlos Otero · Enrique López · Cristian Carrera</p>
+      </div>
+      <div>
+        <p><strong>Sustentación:</strong> 17 de noviembre de 2026</p>
+        <p><a href="index.html#finalidad">Finalidad</a> · <a href="index.html#entradas">Entradas</a> · <a href="index.html#equipo">Quiénes somos</a></p>
+        <p>© 2026 — Material académico de uso escolar.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

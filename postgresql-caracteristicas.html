@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostgreSQL: características | Blog de SGBD</title>
+  <meta name="description" content="Características de PostgreSQL agrupadas por facetas: modelo de datos y SQL, concurrencia, integridad, seguridad, disponibilidad, extensibilidad y licencia.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">DB</span>
+        <span>
+          <span class="brand-name">Blog de SGBD</span><br>
+          <span class="brand-sub">UACI · Bases de Datos</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="que-es-un-sgbd.html">Conceptos</a>
+        <a href="relacional-vs-no-relacional.html">Modelos</a>
+        <a href="postgresql-origen.html" class="active">PostgreSQL</a>
+        <a href="index.html#equipo">Equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <header class="article-header">
+        <div class="narrow">
+          <div class="breadcrumb"><a href="index.html">Inicio</a> › <a href="index.html#entradas">Entradas</a> › PostgreSQL</div>
+          <span class="tag">PostgreSQL</span>
+          <h1>PostgreSQL: características</h1>
+          <div class="article-meta">
+            <span class="byline"><span class="mini-avatar">EL</span> Enrique López</span>
+            <span>16 de noviembre de 2026</span>
+            <span>7 min de lectura</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="narrow prose">
+
+        <div class="toc">
+          <strong>En esta entrada</strong>
+          <ol>
+            <li><a href="#modelo">Modelo de datos y SQL</a></li>
+            <li><a href="#concurrencia">Concurrencia, rendimiento e integridad</a></li>
+            <li><a href="#seguridad">Seguridad</a></li>
+            <li><a href="#disponibilidad">Disponibilidad y respaldo</a></li>
+            <li><a href="#ecosistema">Extensibilidad, ecosistema y plataforma</a></li>
+            <li><a href="#ideas">Ideas para llevar</a></li>
+          </ol>
+        </div>
+
+        <p>
+          Las características de PostgreSQL se entienden mejor si se agrupan por
+          <strong>facetas</strong>, tal como las organiza el material del proyecto:
+          modelo de datos, concurrencia, integridad, seguridad, disponibilidad,
+          extensibilidad y plataforma. Cada faceta responde una pregunta distinta que
+          conviene hacerse antes de elegir un gestor para un proyecto real.
+        </p>
+
+        <h2 id="modelo">Modelo de datos y SQL</h2>
+        <p>
+          PostgreSQL es un SGBD <strong>relacional con características
+          objeto-relacionales</strong>: además de tablas y relaciones, su catálogo
+          almacena funciones, tipos y operadores definidos por el usuario. Expone un
+          SQL de <strong>cumplimiento amplio del estándar</strong> —JOIN, CTE,
+          funciones de ventana— y organiza los objetos en <strong>esquemas</strong>
+          independientes que conviven dentro de la misma base de datos.
+        </p>
+        <p>
+          Los tipos avanzados permiten modelar sin tablas auxiliares: JSONB para
+          documentos semiestructurados, arrays para colecciones homogéneas, rangos
+          para intervalos y tipos compuestos para registros. Sobre esa base,
+          vistas, funciones, triggers y procedimientos almacenados llevan la lógica
+          repetida al servidor.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Característica</th><th>Qué implica</th><th>Para qué te sirve</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>JSONB, arrays y rangos</td>
+                <td>Tipos nativos con operadores e índices propios (GIN).</td>
+                <td>Guardar documentos o listas sin romper el modelo relacional.</td>
+              </tr>
+              <tr>
+                <td>Vistas y funciones</td>
+                <td>Consultas y lógica reutilizables definidas en el servidor.</td>
+                <td>Centralizar reglas y reducir código repetido en la aplicación.</td>
+              </tr>
+              <tr>
+                <td>Triggers y procedimientos</td>
+                <td>Código que se ejecuta ante un evento o bajo demanda.</td>
+                <td>Auditar y validar automáticamente cada cambio de datos.</td>
+              </tr>
+              <tr>
+                <td>Esquemas</td>
+                <td>Espacios de nombres dentro de una misma base de datos.</td>
+                <td>Aislar módulos de distintos proyectos en un único servidor.</td>
+              </tr>
+              <tr>
+                <td>Cumplimiento SQL</td>
+                <td>Soporte amplio de subconsultas, uniones y ventanas.</td>
+                <td>Escribir consultas portables entre distintos gestores.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="concurrencia">Concurrencia, rendimiento e integridad</h2>
+        <h3>Concurrencia y rendimiento</h3>
+        <p>
+          La concurrencia se resuelve con <strong>MVCC</strong>: cada transacción ve
+          una instantánea del dato y las lecturas nunca bloquean las escrituras. El
+          nivel de aislamiento por defecto es <strong>READ COMMITTED</strong> y puede
+          subirse a <strong>REPEATABLE READ</strong> o <strong>SERIALIZABLE</strong>
+          según lo que la aplicación necesite. El rendimiento lo apoyan el particionado
+          declarativo, las consultas paralelas, el <code class="inline">autovacuum</code>
+          que libera espacio y un planificador basado en costos que usa las
+          estadísticas recolectadas por <code class="inline">ANALYZE</code>.
+        </p>
+        <div class="callout">
+          <span class="callout-title">Idea clave</span>
+          <p>
+            READ COMMITTED es el nivel por defecto: cada sentencia ve los cambios
+            confirmados al iniciarse. Al subir a SERIALIZABLE el motor detecta y
+            rechaza conflictos, por lo que la aplicación debe estar preparada para
+            reintentar la transacción.
+          </p>
+        </div>
+        <p>El tipo de índice se elige según la forma de consulta:</p>
+        <ul>
+          <li><strong>B-tree</strong> — igualdad y rangos; es el índice por defecto.</li>
+          <li><strong>Hash</strong> — búsquedas de igualdad sobre una columna.</li>
+          <li><strong>GiST</strong> — geometría y rangos; base de PostGIS.</li>
+          <li><strong>GIN</strong> — valores compuestos: JSONB, arrays y texto completo.</li>
+          <li><strong>BRIN</strong> — tablas grandes correlacionadas con el orden físico; ocupa muy poco espacio.</li>
+        </ul>
+        <h3>Integridad y transacciones</h3>
+        <p>
+          PostgreSQL cumple las propiedades <strong>ACID</strong> y hace cumplir la
+          integridad declarativa con <strong>claves primarias y foráneas</strong>,
+          restricciones <strong>CHECK</strong> y <strong>UNIQUE</strong>. Para
+          deshacer parcialmente dentro de una transacción se usan
+          <strong>guardpoints</strong> (<code class="inline">SAVEPOINT</code>):
+          PostgreSQL <strong>no admite transacciones anidadas</strong> como tales.
+        </p>
+
+        <h2 id="seguridad">Seguridad</h2>
+        <p>
+          El control de acceso se organiza en <strong>roles y permisos por
+          objeto</strong> (tablas, columnas, funciones). La autenticación usa
+          <strong>SCRAM-SHA-256</strong> y el tránsito se protege con
+          <strong>TLS</strong>. La <em>row-level security</em> permite que cada fila
+          lleve su propia condición de acceso, de modo que una misma consulta devuelve
+          resultados distintos según quién la ejecuta. La auditoría se implementa con
+          la extensión <strong>pgaudit</strong>, y el cifrado en disco se resuelve en
+          el nivel del sistema de archivos o del dispositivo.
+        </p>
+
+        <h2 id="disponibilidad">Disponibilidad y respaldo</h2>
+        <p>
+          La recuperación se apoya en el <strong>WAL archiving</strong>: con los
+          registros archivados es posible un <strong>PITR</strong>, es decir, restaurar
+          la base hasta el instante exacto que se necesita. La replicación en
+          <strong>streaming</strong> mantiene copias del primario de forma
+          síncrona o ascíncrona, mientras la <strong>replicación lógica</strong>
+          copia tablas seleccionadas hacia otra instancia o versión. Para respaldos se
+          usan <code class="inline">pg_dump</code> (lógicos) y
+          <code class="inline">pg_basebackup</code> (imagen completa), y en el ecosistema
+          existen herramientas de alta disponibilidad como <strong>Patroni</strong>,
+          que automatiza el conmutador por fallo.
+        </p>
+
+        <h2 id="ecosistema">Extensibilidad, ecosistema y plataforma</h2>
+        <p>
+          Con <code class="inline">CREATE EXTENSION</code> se añaden funcionalidades
+          sin modificar el motor. Los <em>foreign data wrappers</em> permiten consultar
+          datos que viven en otras fuentes —otro gestor, un CSV o una API— como si
+          fueran tablas locales, y los tipos y operadores personalizados amplían el
+          lenguaje. En cuanto a herramientas, conviven <strong>psql</strong>,
+          <strong>pgAdmin</strong> y <strong>DBeaver</strong>, junto con drivers como
+          <strong>libpq</strong>, <strong>psycopg2</strong> y <strong>JDBC</strong> y
+          los ORMs habituales.
+        </p>
+        <ul>
+          <li><strong>PostGIS</strong> — consultas espaciales sobre geometrías.</li>
+          <li><strong>pgcrypto</strong> — funciones criptográficas dentro de la base.</li>
+          <li><strong>pg_trgm</strong> — similitud de cadenas para búsqueda difusa.</li>
+          <li><strong>pg_stat_statements</strong> — estadísticas de las consultas ejecutadas.</li>
+        </ul>
+        <h3>Multiplataforma y licencia</h3>
+        <p>
+          El servidor corre en <strong>Linux, Windows, macOS y BSD</strong>, se
+          distribuye como <strong>software de código abierto con licencia permisiva</strong>
+          —sin costes de licencia ni ataduras de proveedor— y cuenta con una
+          <strong>comunidad global</strong> que publica documentación, extensiones y
+          versiones estables de forma periódica.
+        </p>
+
+        <h2 id="ideas">Ideas para llevar</h2>
+        <div class="callout tip">
+          <span class="callout-title">Resumen</span>
+          <p>
+            1) Las características de PostgreSQL se agrupan en facetas: modelo de datos,
+            concurrencia, integridad, seguridad, disponibilidad, extensibilidad y
+            plataforma. 2) MVCC, los índices y el planificador de costos sostienen el
+            rendimiento; ACID y las restricciones sostienen la integridad. 3) WAL,
+            replicación y PITR sostienen la disponibilidad, y las extensiones amplían el
+            motor sin tocarlo.
+          </p>
+        </div>
+        <p>
+          Con el «qué» cubierto, la siguiente entrada baja al interior del motor: cómo
+          se organiza realmente la estructura de PostgreSQL en memoria y en disco para
+          sostener todas estas características.
+        </p>
+
+        <nav class="pager">
+          <a href="postgresql-que-ofrece.html"><span class="dir">Anterior</span><span class="ttl">PostgreSQL: qué ofrece y cómo lo hace</span></a>
+          <a class="next" href="postgresql-estructura.html"><span class="dir">Siguiente</span><span class="ttl">PostgreSQL: estructura interna ›</span></a>
+        </nav>
+
+        <p class="related-title"><a href="index.html#entradas">← Todas las entradas del blog</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p><strong>Blog de SGBD</strong> — Proyecto Final de Gestión de Bases de Datos</p>
+        <p>Universidad Autónoma de Chiriquí · Departamento de Ciencias Computacionales</p>
+        <p>Grupo: Aaron Pérez · Carlos Otero · Enrique López · Cristian Carrera</p>
+      </div>
+      <div>
+        <p><strong>Sustentación:</strong> 17 de noviembre de 2026</p>
+        <p><a href="index.html#finalidad">Finalidad</a> · <a href="index.html#entradas">Entradas</a> · <a href="index.html#equipo">Quiénes somos</a></p>
+        <p>© 2026 — Material académico de uso escolar.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

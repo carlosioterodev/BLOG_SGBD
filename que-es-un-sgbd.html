@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¿Qué es un SGBD? | Blog de SGBD</title>
+  <meta name="description" content="Definición de un Sistema Gestor de Base de Datos (SGBD): componentes, funciones y ventajas frente a los archivos planos.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">DB</span>
+        <span>
+          <span class="brand-name">Blog de SGBD</span><br>
+          <span class="brand-sub">UACI · Bases de Datos</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="que-es-un-sgbd.html" class="active">Conceptos</a>
+        <a href="relacional-vs-no-relacional.html">Modelos</a>
+        <a href="postgresql-origen.html">PostgreSQL</a>
+        <a href="index.html#equipo">Equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <header class="article-header">
+        <div class="narrow">
+          <div class="breadcrumb"><a href="index.html">Inicio</a> › <a href="index.html#entradas">Entradas</a> › Conceptos</div>
+          <span class="tag">Conceptos · I</span>
+          <h1>¿Qué es un SGBD?</h1>
+          <div class="article-meta">
+            <span class="byline"><span class="mini-avatar">AP</span> Aaron Pérez</span>
+            <span>14 de noviembre de 2026</span>
+            <span>5 min de lectura</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="narrow prose">
+
+        <div class="toc">
+          <strong>En esta entrada</strong>
+          <ol>
+            <li><a href="#definicion">Definición</a></li>
+            <li><a href="#componentes">Componentes principales</a></li>
+            <li><a href="#funciones">Qué funciones cumple</a></li>
+            <li><a href="#archivos">SGBD vs. archivos planos</a></li>
+            <li><a href="#ideas">Ideas para llevar</a></li>
+          </ol>
+        </div>
+
+        <p>
+          Antes de clasificar, comparar o elegir un gestor, conviene responder la pregunta
+          más básica de la materia: <strong>¿qué es exactamente un SGBD?</strong> La sigla
+          aparece en todos lados —en los apuntes, en los exámenes y en las ofertas de
+          trabajo— y su respuesta es más sencilla de lo que parece.
+        </p>
+
+        <h2 id="definicion">Definición</h2>
+        <p>
+          Un <strong>Sistema Gestor de Base de Datos (SGBD)</strong> es un conjunto de
+          programas y componentes de software que permite
+          <strong>crear, definir, manipular, controlar y administrar</strong> una base de
+          datos de forma centralizada, garantizando que la información sea
+          <strong>consistente, segura, compartida y no redundante</strong>.
+        </p>
+        <p>
+          En lugar de que cada aplicación lea y escriba sus propios archivos, todas
+          pasan por el SGBD. Él es el único que sabe <em>dónde</em> están los datos,
+          <em>cómo</em> están organizados y <em>quién</em> tiene permiso para tocarlos.
+        </p>
+        <div class="callout">
+          <span class="callout-title">Idea clave</span>
+          <p>
+            El SGBD es el <strong>intermediario</strong> entre el usuario (o la
+            aplicación) y los datos físicos: traduce las peticiones lógicas
+            (<code class="inline">SELECT</code>, <code class="inline">INSERT</code>…)
+            en operaciones reales sobre el disco.
+          </p>
+        </div>
+
+        <h2 id="componentes">Componentes principales</h2>
+        <p>Un SGBD típico se compone de:</p>
+        <ul>
+          <li><strong>Motor de almacenamiento:</strong> gestiona la lectura y escritura física de los datos en disco (por ejemplo, el <em>tablespace</em> de PostgreSQL).</li>
+          <li><strong>Catálogo del sistema (diccionario de datos):</strong> guarda el <em>metadata</em>: definiciones de tablas, columnas, índices, tipos y permisos.</li>
+          <li><strong>Analizador y planificador de consultas (optimizer):</strong> interpreta el SQL y elige el plan de ejecución más eficiente.</li>
+          <li><strong>Gestor de concurrencia:</strong> coordina a los usuarios simultáneos para que no se pisen las escrituras (en PostgreSQL: <em>locks</em> y MVCC).</li>
+          <li><strong>Gestor de integridad y control de acceso:</strong> aplica reglas (claves, restricciones) y verifica quién puede hacer qué.</li>
+          <li><strong>Utilidades:</strong> herramientas de respaldo (backup), restauración, importación/exportación y monitoreo.</li>
+        </ul>
+
+        <h2 id="funciones">Qué funciones cumple</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Función</th><th>Qué hace</th><th>Ejemplo</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Definición</td>
+                <td>Crea y modifica la estructura de la base de datos (esquema).</td>
+                <td><code class="inline">CREATE TABLE</code></td>
+              </tr>
+              <tr>
+                <td>Manipulación</td>
+                <td>Permite leer y modificar los datos almacenados.</td>
+                <td><code class="inline">SELECT</code>, <code class="inline">INSERT</code>, <code class="inline">UPDATE</code></td>
+              </tr>
+              <tr>
+                <td>Control</td>
+                <td>Protege los datos: permisos, respaldos y recuperación ante fallos.</td>
+                <td><code class="inline">GRANT</code>, <code class="inline">pg_dump</code></td>
+              </tr>
+              <tr>
+                <td>Administración</td>
+                <td>Gestiona el rendimiento, la concurrencia y los recursos del servidor.</td>
+                <td>Vacuum, índices, estadísticas</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="archivos">SGBD vs. archivos planos</h2>
+        <p>
+          ¿Por qué no simplemente guardar todo en archivos de texto o de Excel? La
+          respuesta corta: porque a medida que crece el proyecto, los archivos planos
+          se rompen. Veamos la diferencia:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Aspecto</th><th>Archivos planos</th><th>SGBD</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Redundancia</td>
+                <td>Los mismos datos se repiten en varios archivos.</td>
+                <td>Normalización: cada dato vive en un solo lugar.</td>
+              </tr>
+              <tr>
+                <td>Integridad</td>
+                <td>Nadie valida nada; los errores entran sin más.</td>
+                <td>Restricciones de clave primaria, foránea y de dominio.</td>
+              </tr>
+              <tr>
+                <td>Acceso concurrente</td>
+                <td>Dos usuarios a la vez = archivo corrupto.</td>
+                <td>Gestor de concurrencia y bloqueos.</td>
+              </tr>
+              <tr>
+                <td>Seguridad</td>
+                <td>Quien tenga el archivo, ve todo.</td>
+                <td>Usuarios, roles y permisos por objeto.</td>
+              </tr>
+              <tr>
+                <td>Consultas</td>
+                <td>Programas propietarios o búsqueda manual.</td>
+                <td>Lenguaje estándar (SQL) para todo.</td>
+              </tr>
+              <tr>
+                <td>Recuperación</td>
+                <td>Un fallo = pérdida total.</td>
+                <td>Respaldo, WAL y recuperación ante fallos.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="ideas">Ideas para llevar</h2>
+        <div class="callout tip">
+          <span class="callout-title">Resumen</span>
+          <p>
+            1) Un SGBD centraliza la definición, manipulación y control de los datos.
+            2) Su catálogo, su optimizador y su gestor de concurrencia son lo que lo
+            distingue de una carpeta con archivos. 3) Frente a los archivos planos
+            gana en integridad, seguridad, concurrencia y recuperación.
+          </p>
+        </div>
+        <p>
+          Con este concepto en mano, el siguiente paso es preguntar:
+          <strong>¿todos los SGBD funcionan igual?</strong> La respuesta es no, y por eso
+          existen varias formas de clasificarlos según la necesidad de un proyecto.
+          Ese es justo el tema de la siguiente entrada.
+        </p>
+
+        <nav class="pager">
+          <a class="empty"><span class="dir">Anterior</span><span class="ttl">—</span></a>
+          <a class="next" href="clasificacion-sgbd.html"><span class="dir">Siguiente</span><span class="ttl">Clasificación de los SGBD ›</span></a>
+        </nav>
+
+        <p class="related-title"><a href="index.html#entradas">← Todas las entradas del blog</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p><strong>Blog de SGBD</strong> — Proyecto Final de Gestión de Bases de Datos</p>
+        <p>Universidad Autónoma de Chiriquí · Departamento de Ciencias Computacionales</p>
+        <p>Grupo: Aaron Pérez · Carlos Otero · Enrique López · Cristian Carrera</p>
+      </div>
+      <div>
+        <p><strong>Sustentación:</strong> 17 de noviembre de 2026</p>
+        <p><a href="index.html#finalidad">Finalidad</a> · <a href="index.html#entradas">Entradas</a> · <a href="index.html#equipo">Quiénes somos</a></p>
+        <p>© 2026 — Material académico de uso escolar.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

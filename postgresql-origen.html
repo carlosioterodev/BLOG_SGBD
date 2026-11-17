@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostgreSQL: nombre, siglas y origen | Blog de SGBD</title>
+  <meta name="description" content="Qué significa PostgreSQL (Postgres + SQL), sus siglas PG/PGSQL, el origen del proyecto en UC Berkeley con Michael Stonebraker, su cronología y su licencia.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">DB</span>
+        <span>
+          <span class="brand-name">Blog de SGBD</span><br>
+          <span class="brand-sub">UACI · Bases de Datos</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="que-es-un-sgbd.html">Conceptos</a>
+        <a href="relacional-vs-no-relacional.html">Modelos</a>
+        <a href="postgresql-origen.html" class="active">PostgreSQL</a>
+        <a href="index.html#equipo">Equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <header class="article-header">
+        <div class="narrow">
+          <div class="breadcrumb"><a href="index.html">Inicio</a> › <a href="index.html#entradas">Entradas</a> › PostgreSQL</div>
+          <span class="tag">PostgreSQL</span>
+          <h1>PostgreSQL: nombre, siglas y origen</h1>
+          <div class="article-meta">
+            <span class="byline"><span class="mini-avatar">AP</span> Aaron Pérez</span>
+            <span>15 de noviembre de 2026</span>
+            <span>6 min de lectura</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="narrow prose">
+
+        <div class="toc">
+          <strong>En esta entrada</strong>
+          <ol>
+            <li><a href="#nombre">Nombre y siglas</a></li>
+            <li><a href="#origen">Origen en UC Berkeley</a></li>
+            <li><a href="#cronologia">Cronología del proyecto</a></li>
+            <li><a href="#comunidad">Comunidad y licencia</a></li>
+            <li><a href="#usuarios">Quiénes lo usan</a></li>
+            <li><a href="#ideas">Ideas para llevar</a></li>
+          </ol>
+        </div>
+
+        <p>
+          Antes de instalarlo, crear tablas o compararlo con otros motores,
+          conviene responder una pregunta aparentemente simple:
+          <strong>¿por qué se llama PostgreSQL?</strong> El nombre esconde la
+          historia del proyecto y explica por qué hoy es uno de los SGBD de
+          código libre más utilizados del mundo.
+        </p>
+
+        <h2 id="nombre">Nombre y siglas</h2>
+        <p>
+          El nombre completo es <strong>PostgreSQL</strong>, y se forma sumando
+          dos palabras: <strong>Postgres + SQL</strong>. La forma se eligió en
+          <strong>1996</strong> para indicar que el sistema ya soporta SQL, algo
+          que su predecesor todavía no ofrecía. En la práctica también se le llama
+          simplemente <strong>Postgres</strong> o por sus siglas
+          <strong>PG</strong> y <strong>PGSQL</strong>.
+        </p>
+        <p>
+          El nombre original fue <strong>POSTGRES</strong>: un proyecto de la
+          <strong>Universidad de California en Berkeley</strong> que continuaba el
+          sistema <strong>Ingres</strong> de Michael Stonebraker. Es decir, antes
+          de las siglas actuales ya existía un «Postgres» con mucha historia
+          detrás.
+        </p>
+        <div class="callout">
+          <span class="callout-title">Idea clave</span>
+          <p>
+            <strong>PostgreSQL = Postgres + SQL</strong>. El nombre no es un
+            acrónimo secreto: es la unión del nombre original del proyecto con la
+            letra <code class="inline">SQL</code>, para señalar que el motor ya
+            habla el lenguaje estándar de bases de datos relacionales.
+          </p>
+        </div>
+
+        <h2 id="origen">Origen en UC Berkeley</h2>
+        <p>
+          El proyecto nació en la <strong>Universidad de California en
+          Berkeley</strong> bajo la dirección de <strong>Michael
+          Stonebraker</strong>. En <strong>1986</strong> arrancó POSTGRES con
+          financiamiento de la <strong>NSF</strong> y la <strong>ARPA</strong>, y
+          a finales de los años ochenta se obtuvo la primera versión funcional.
+        </p>
+        <p>
+          En <strong>1994</strong>, Andrew Yu y Jolly Chen publicaron
+          <strong>Postgres95</strong>: SQL añadido al sistema, reescrito en
+          <strong>C</strong> y distribuido con una licencia libre. En
+          <strong>1996</strong> se formó el <strong>PostgreSQL Global Development
+          Group</strong> y se publicó <strong>PostgreSQL 6.0</strong>, bajo una
+          licencia permisiva tipo BSD/MIT que permitió a cualquier persona o
+          empresa participar en su desarrollo. De ahí viene el «gre» del nombre:
+          Postgres le añadieron SQL y el proyecto pasó a llamarse PostgreSQL.
+        </p>
+
+        <h2 id="cronologia">Cronología del proyecto</h2>
+        <p>Los hitos principales del proyecto, desde Berkeley hasta la actualidad:</p>
+        <ul class="timeline">
+          <li>
+            <span class="year">1982–1988</span><br>
+            <span class="event">En Berkeley se desarrolla <strong>Ingres</strong> y, como continuación, arranca el proyecto <strong>POSTGRES</strong>.</span>
+          </li>
+          <li>
+            <span class="year">1994</span><br>
+            <span class="event"><strong>Postgres95</strong>: Andrew Yu y Jolly Chen añaden SQL, reescriben el sistema en C y lo publican con licencia libre.</span>
+          </li>
+          <li>
+            <span class="year">1996</span><br>
+            <span class="event"><strong>PostgreSQL 6.0</strong> y nacimiento del proyecto open source: se forma el PostgreSQL Global Development Group.</span>
+          </li>
+          <li>
+            <span class="year">2005</span><br>
+            <span class="event"><strong>PostgreSQL 8.0</strong>: primera versión con soporte nativo en Windows.</span>
+          </li>
+          <li>
+            <span class="year">2010</span><br>
+            <span class="event"><strong>PostgreSQL 9.0</strong>: se incorpora la replicación en streaming.</span>
+          </li>
+          <li>
+            <span class="year">2025</span><br>
+            <span class="event"><strong>PostgreSQL 18</strong>: versión estable actual del sistema.</span>
+          </li>
+          <li class="current">
+            <span class="year">19 de noviembre de 2026</span><br>
+            <span class="event">Se espera el lanzamiento de <strong>PostgreSQL 19</strong>, cuya release candidate está en pruebas.</span>
+          </li>
+        </ul>
+
+        <h2 id="comunidad">Comunidad y licencia</h2>
+        <p>
+          El proyecto lo mantiene el <strong>PostgreSQL Global Development
+          Group</strong>, una comunidad de desarrolladores y empresas que
+          colaboran de forma abierta. No hay una empresa propietaria detrás del
+          motor: la <strong>licencia PostgreSQL</strong> es permisiva, de tipo
+          <strong>BSD</strong>, y permite usar, modificar y distribuir el software
+          sin regalías ni licencias comerciales.
+        </p>
+        <p>
+          Ese modelo de gobernanza se traduce en un ritmo de trabajo predecible.
+          Puedes consultarlo en el
+          <a href="https://www.postgresql.org/about/" target="_blank" rel="noopener">sitio oficial «About PostgreSQL»</a>:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Aspecto</th><th>Cómo es PostgreSQL</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Licencia</td>
+                <td>Permisa, tipo BSD: uso, modificación y distribución libres de regalías.</td>
+              </tr>
+              <tr>
+                <td>Gobernanza</td>
+                <td>PostgreSQL Global Development Group, sin empresa propietaria detrás.</td>
+              </tr>
+              <tr>
+                <td>Ciclo de versiones</td>
+                <td>Una versión mayor al año.</td>
+              </tr>
+              <tr>
+                <td>Soporte por versión</td>
+                <td>Aproximadamente cinco años de soporte.</td>
+              </tr>
+              <tr>
+                <td>Costo</td>
+                <td>Sin costo de licencia: es software de código abierto.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="usuarios">Quiénes lo usan</h2>
+        <p>
+          PostgreSQL no es un proyecto de nicho: está presente en empresas de
+          tecnología, redes sociales, entretenimiento, finanzas y agencias
+          espaciales. Entre sus usuarios destacados se encuentran:
+        </p>
+        <ul>
+          <li><strong>Apple</strong></li>
+          <li><strong>Instagram</strong></li>
+          <li><strong>Reddit</strong></li>
+          <li><strong>Spotify</strong></li>
+          <li><strong>Twitch</strong></li>
+          <li><strong>Skype</strong></li>
+          <li><strong>Robinhood</strong></li>
+          <li><strong>NASA</strong></li>
+        </ul>
+        <p>
+          Que un mismo motor sirva a organizaciones tan distintas dice mucho de
+          su madurez: detrás de cada nombre de la lista hay datos vivos,
+          consultas simultáneas y exigencias de disponibilidad muy altas.
+        </p>
+
+        <h2 id="ideas">Ideas para llevar</h2>
+        <div class="callout tip">
+          <span class="callout-title">Resumen</span>
+          <p>
+            1) PostgreSQL es «Postgres + SQL»: el nombre se eligió en 1996 para
+            indicar que el sistema ya soporta SQL. 2) Viene de POSTGRES, el
+            proyecto de UC Berkeley dirigido por Michael Stonebraker como
+            continuación de Ingres. 3) Lo mantiene una comunidad, no una empresa:
+            licencia permisiva tipo BSD, una versión mayor al año y unos cinco
+            años de soporte por versión.
+          </p>
+        </div>
+        <p>
+          Saber de dónde viene ayuda a entender su filosofía, pero la pregunta
+          práctica es otra: <strong>¿qué ofrece PostgreSQL y cómo lo hace?</strong>
+          Esa es exactamente la siguiente entrada, y en ella encontrarás también
+          la
+          <a href="https://www.postgresql.org/docs/" target="_blank" rel="noopener">documentación oficial</a>
+          para profundizar.
+        </p>
+
+        <nav class="pager">
+          <a href="dmer-vs-modelo-relacional.html"><span class="dir">Anterior</span><span class="ttl">DMER vs. Diagrama Modelo Relacional</span></a>
+          <a class="next" href="postgresql-que-ofrece.html"><span class="dir">Siguiente</span><span class="ttl">PostgreSQL: qué ofrece y cómo lo hace ›</span></a>
+        </nav>
+
+        <p class="related-title"><a href="index.html#entradas">← Todas las entradas del blog</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p><strong>Blog de SGBD</strong> — Proyecto Final de Gestión de Bases de Datos</p>
+        <p>Universidad Autónoma de Chiriquí · Departamento de Ciencias Computacionales</p>
+        <p>Grupo: Aaron Pérez · Carlos Otero · Enrique López · Cristian Carrera</p>
+      </div>
+      <div>
+        <p><strong>Sustentación:</strong> 17 de noviembre de 2026</p>
+        <p><a href="index.html#finalidad">Finalidad</a> · <a href="index.html#entradas">Entradas</a> · <a href="index.html#equipo">Quiénes somos</a></p>
+        <p>© 2026 — Material académico de uso escolar.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostgreSQL: estructura interna | Blog de SGBD</title>
+  <meta name="description" content="Cómo funciona por dentro PostgreSQL: los procesos (postmaster, backends y procesos de fondo), la memoria (shared buffers, work_mem) y el disco (data directory, páginas de 8 KB).">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">DB</span>
+        <span>
+          <span class="brand-name">Blog de SGBD</span><br>
+          <span class="brand-sub">UACI · Bases de Datos</span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="que-es-un-sgbd.html">Conceptos</a>
+        <a href="relacional-vs-no-relacional.html">Modelos</a>
+        <a href="postgresql-origen.html" class="active">PostgreSQL</a>
+        <a href="index.html#equipo">Equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <header class="article-header">
+        <div class="narrow">
+          <div class="breadcrumb"><a href="index.html">Inicio</a> › <a href="index.html#entradas">Entradas</a> › PostgreSQL</div>
+          <span class="tag">PostgreSQL</span>
+          <h1>PostgreSQL: estructura interna</h1>
+          <div class="article-meta">
+            <span class="byline"><span class="mini-avatar">EL</span> Enrique López</span>
+            <span>16 de noviembre de 2026</span>
+            <span>6 min de lectura</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="narrow prose">
+
+        <div class="toc">
+          <strong>En esta entrada</strong>
+          <ol>
+            <li><a href="#procesos">Procesos: quién hace el trabajo</a></li>
+            <li><a href="#memoria">Memoria: caché y trabajo</a></li>
+            <li><a href="#disco">Disco: dónde viven los datos</a></li>
+            <li><a href="#jerarquia">Jerarquía lógica del cluster</a></li>
+            <li><a href="#archivos">De la tabla al archivo</a></li>
+            <li><a href="#ideas">Ideas para llevar</a></li>
+          </ol>
+        </div>
+
+        <p>
+          Ya sabemos qué es un SGBD y cómo se clasifican; ahora conviene abrir el capó
+          del motor. Por dentro, un servidor PostgreSQL trabaja en
+          <strong>tres capas que funcionan juntas: procesos, memoria y disco</strong>.
+          Los procesos ejecutan las consultas, la memoria guarda en RAM lo que se usa
+          seguido y el disco conserva los datos de forma permanente.
+        </p>
+        <div class="callout">
+          <span class="callout-title">Idea clave</span>
+          <p>
+            Ninguna capa trabaja sola: los <strong>procesos</strong> piden datos al
+            <strong>disco</strong> cuando la <strong>memoria</strong> no los tiene.
+          </p>
+        </div>
+
+        <h2 id="procesos">Procesos: quién hace el trabajo</h2>
+        <p>
+          PostgreSQL usa un modelo de <strong>múltiples procesos</strong>. El principal
+          es el <strong>postmaster</strong>, el orquestador que arranca con el servidor
+          y <strong>acepta las conexiones</strong>. Por cada conexión lanza un
+          <strong>proceso backend</strong> que habla solo con ese cliente: analiza,
+          planifica y ejecuta la consulta.
+        </p>
+        <p>Junto a ellos trabajan los <strong>procesos de fondo</strong>:</p>
+        <ul>
+          <li><strong>walwriter:</strong> escribe en disco el registro WAL de los cambios.</li>
+          <li><strong>autovacuum launcher / worker:</strong> limpian el espacio de las filas obsoletas.</li>
+          <li><strong>bgwriter:</strong> mantiene caliente la caché llevando páginas al disco.</li>
+          <li><strong>checkpointer:</strong> crea puntos de control de recuperación.</li>
+          <li><strong>Generador de estadísticas:</strong> recoge datos para el optimizador.</li>
+          <li><strong>Workers de replicación lógica y de trabajos paralelos:</strong> copian cambios a otros servidores y ejecutan consultas en paralelo.</li>
+        </ul>
+
+        <div class="diagram">
+          <div class="arch">
+            <div class="col">
+              <div class="node">Clientes<small>psql</small></div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="server">
+              <div class="server-title">Servidor PostgreSQL</div>
+              <div class="node tint">postmaster<small>acepta conexiones</small></div>
+              <div class="row">
+                <div class="node">Backend<small>1 por conexión</small></div>
+                <div class="node">walwriter</div>
+                <div class="node">bgwriter</div>
+              </div>
+              <div class="row">
+                <div class="node">autovacuum</div>
+                <div class="node">checkpointer</div>
+                <div class="node">Estadísticas</div>
+              </div>
+              <div class="row">
+                <div class="node">Replicación lógica<small>workers</small></div>
+                <div class="node">Trabajos paralelos<small>workers</small></div>
+              </div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="col">
+              <div class="node">Disco<small>data directory</small></div>
+            </div>
+          </div>
+        </div>
+
+        <h2 id="memoria">Memoria: caché y trabajo</h2>
+        <p>
+          Ir al disco en cada lectura sería lentísimo, así que el servidor guarda en
+          RAM lo que más usa: el <strong>shared buffers</strong>, caché de páginas
+          compartida por todos los procesos, con <strong>~25 % de la RAM</strong>.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Memoria</th><th>Para qué sirve</th><th>Dónde se configura</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>shared buffers</td>
+                <td>Caché de páginas del disco, compartida por todos los procesos.</td>
+                <td>postgresql.conf · ~25 % de la RAM</td>
+              </tr>
+              <tr>
+                <td>work_mem</td>
+                <td>Memoria de cada operación de ordenamiento o hash.</td>
+                <td>postgresql.conf</td>
+              </tr>
+              <tr>
+                <td>WAL buffers</td>
+                <td>Cambios pendientes de escritura en el WAL.</td>
+                <td>postgresql.conf</td>
+              </tr>
+              <tr>
+                <td>temp buffers</td>
+                <td>Tablas temporales de la sesión.</td>
+                <td>postgresql.conf</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Se ajustan en <strong>postgresql.conf</strong>: demasiada memoria le quita RAM
+          al sistema operativo y demasiada poca obliga a volver al disco.
+        </p>
+
+        <h2 id="disco">Disco: dónde viven los datos</h2>
+        <p>
+          Todo lo permanente vive en el <strong>data directory</strong>, identificado
+          por la variable <strong>$PGDATA</strong>, con carpetas muy concretas:
+        </p>
+        <ul>
+          <li><strong>global/</strong>: datos comunes al cluster (usuarios, roles).</li>
+          <li><strong>base/&lt;OID de cada base&gt;</strong>: una carpeta por base de datos.</li>
+          <li><strong>pg_wal/</strong>: el registro de escritura previa (WAL) para la recuperación.</li>
+          <li><strong>pg_multixact/</strong>: información de bloqueos compartidos entre transacciones.</li>
+          <li><strong>pg_stat/</strong>: estadísticas del servidor.</li>
+        </ul>
+        <p>
+          El espacio de una tabla no es un archivo fijo: los datos viven en
+          <strong>archivos de relación que crecen en segmentos de 1 GB</strong>. Dentro
+          de ellos, la unidad mínima de lectura es una <strong>página de 8 KB</strong> que
+          contiene <strong>múltiples filas (tuplas)</strong> con su cabecera. A ellos se
+          suman el <strong>.fsm</strong> (mapa de espacio libre) y el <strong>.vm</strong>
+          (mapa de visibilidad, qué versiones de cada fila son visibles según MVCC).
+        </p>
+
+        <h2 id="jerarquia">Jerarquía lógica del cluster</h2>
+        <p>Cada uno de los cinco niveles contiene al siguiente:</p>
+
+        <div class="diagram">
+          <div class="hierarchy">
+            <div class="h-level l1">
+              <span class="h-label">Cluster</span>
+              <span class="h-note">El servidor completo, con todas sus bases.</span>
+              <div class="h-level l2">
+                <span class="h-label">Database</span>
+                <span class="h-note">Una base, como blog_sgbd, con su carpeta en base/&lt;OID&gt;.</span>
+                <div class="h-level l3">
+                  <span class="h-label">Schema</span>
+                  <span class="h-note">Agrupa tablas, índices y vistas (por ejemplo, public).</span>
+                  <div class="h-level l4">
+                    <span class="h-label">Tabla</span>
+                    <span class="h-note">Una tabla se guarda en archivos de relación segmentados en 1 GB; cada página mide 8 KB y contiene múltiples tuplas.</span>
+                    <div class="h-level l5">
+                      <span class="h-label">Columna / Fila</span>
+                      <span class="h-note">Las columnas definen el tipo; cada tupla ocupa un lugar en una página de 8 KB.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 id="archivos">De la tabla al archivo</h2>
+        <p>
+          La traducción es sencilla: <strong>una tabla (o un índice) es un conjunto de
+          archivos de relación</strong> dentro del directorio de su base; si crece más
+          allá de 1 GB aparece un segmento nuevo.
+        </p>
+        <p>
+          La definición de todo eso la guarda el <strong>catálogo del sistema</strong>
+          <strong>pg_catalog</strong>: tablas, columnas, tipos, índices, funciones y
+          permisos, como una tabla de contenidos que consulta el SGBD.
+        </p>
+        <div class="callout">
+          <span class="callout-title">Idea clave</span>
+          <p>
+            Para el usuario, una tabla es un objeto con nombre; para el disco, un
+            conjunto de archivos. <strong>pg_catalog</strong> traduce entre ambos mundos.
+          </p>
+        </div>
+
+        <h2 id="ideas">Ideas para llevar</h2>
+        <div class="callout tip">
+          <span class="callout-title">Resumen</span>
+          <p>
+            1) Por dentro, PostgreSQL son tres capas: procesos (postmaster, backends y
+            procesos de fondo), memoria (shared buffers al 25 % de la RAM) y disco
+            ($PGDATA). 2) Los datos viven en archivos de relación de 1 GB, con páginas
+            de 8 KB y múltiples tuplas. 3) La jerarquía cluster → base → esquema →
+            tabla → columna/fila une lo lógico con lo físico, y pg_catalog lo documenta.
+          </p>
+        </div>
+        <p>
+          Con esta radiografía, toca usarlo: crear una base, definir tablas con claves
+          y JSONB y consultarlas con <code class="inline">JOIN</code>. Ese es el
+          contenido de la siguiente entrada.
+        </p>
+
+        <nav class="pager">
+          <a href="postgresql-caracteristicas.html"><span class="dir">Anterior</span><span class="ttl">PostgreSQL: características</span></a>
+          <a class="next" href="postgresql-ejemplo.html"><span class="dir">Siguiente</span><span class="ttl">PostgreSQL en acción: ejemplo de uso ›</span></a>
+        </nav>
+
+        <p class="related-title"><a href="index.html#entradas">← Todas las entradas del blog</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p><strong>Blog de SGBD</strong> — Proyecto Final de Gestión de Bases de Datos</p>
+        <p>Universidad Autónoma de Chiriquí · Departamento de Ciencias Computacionales</p>
+        <p>Grupo: Aaron Pérez · Carlos Otero · Enrique López · Cristian Carrera</p>
+      </div>
+      <div>
+        <p><strong>Sustentación:</strong> 17 de noviembre de 2026</p>
+        <p><a href="index.html#finalidad">Finalidad</a> · <a href="index.html#entradas">Entradas</a> · <a href="index.html#equipo">Quiénes somos</a></p>
+        <p>© 2026 — Material académico de uso escolar.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
